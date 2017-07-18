@@ -102,7 +102,7 @@ public class Parser {
 		return playerfile;
 	}
 	
-	public String getHome(String username) {
+	public List<Home> getHomes(String username) {
 		File playerfile = getPlayerFile(username);
 		List<Home> all = new ArrayList<>();
 		
@@ -139,18 +139,6 @@ public class Parser {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		if(all.size() != 0) {
-			String ret = new String();
-			for(Home i: all) {
-				ret += i.getName() + ", ";
-			}
-			
-			String suffix = (all.size() == 1) ? " is" : "s are";
-			return "Your home" + suffix + ": " + ret.substring(0, ret.length() - 2);
-		} else {
-			return "You haven't set any homes!";
-		}
+		return all;
 	}
-
 }
