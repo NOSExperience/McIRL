@@ -31,6 +31,6 @@ public class Home {
 	
 	public Vector3d asVector3d() {
 		String[] working = coords.split(", ");
-		return new Vector3d(Integer.parseInt(working[0]), Integer.parseInt(working[1]), Integer.parseInt(working[2]));
+		return new Vector3d(Double.parseDouble(working[0]), Double.parseDouble(working[1]), Double.parseDouble(working[2]));
 	}
 }

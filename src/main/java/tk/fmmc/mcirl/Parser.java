@@ -7,8 +7,17 @@ import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -112,6 +121,7 @@ public class Parser {
 			NodeList nodes = d.getElementsByTagName(HOME_SECTION_TAG);
 			for(int i = 0; i < nodes.getLength(); i++) {
 				Node n = nodes.item(i);
+			
 				
 				NodeList home_nodes = n.getChildNodes();
 				for(int j = 0; j < home_nodes.getLength(); j++) {
@@ -140,5 +150,117 @@ public class Parser {
 			e.printStackTrace();
 		}
 		return all;
+	}
+	
+	public void addHome(String username, String homename){
+		File playerfile = getPlayerFile(username);
+		
+		try{
+			Document d = dBuilder.parse(playerfile);
+			Location<World> location = Sponge.getServer().getPlayer(username).get().getLocation();
+		
+			boolean exists = false;
+			
+			for(Home i: getHomes(username)){
+				if(i.getName().equals(homename)){
+					exists = true;
+				}
+			}
+			
+			if(exists == false){
+				Element home = d.createElement(HOME_TAG);
+				home.setAttribute(HOME_ATTRIB_NAME, homename);
+				home.setTextContent(location.getX() + ", " + location.getY() + ", " + location.getZ());
+				d.getElementsByTagName(HOME_SECTION_TAG).item(0).appendChild(home);
+				
+				DOMSource source = new DOMSource(d);
+				
+				TransformerFactory transFactory = TransformerFactory.newInstance();
+				Transformer transformer = transFactory.newTransformer();
+				StreamResult xmlResult = new StreamResult(getPlayerFile(username));
+				transformer.transform(source, xmlResult);
+			}else{
+				Sponge.getServer().getPlayer(username).get().sendMessage(Text.of("This home already exists! type /home add " + homename + " -f to change this home"));
+			}
+		} catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+	
+	public void addHome(String username, String homename, String option){
+		File playerfile = getPlayerFile(username);
+		
+		try{
+			Document d = dBuilder.parse(playerfile);
+			Location<World> location = Sponge.getServer().getPlayer(username).get().getLocation();
+			
+			if(option.equals("-f")){
+				NodeList nodes = d.getElementsByTagName(HOME_SECTION_TAG);
+				for(int i = 0; i < nodes.getLength(); i++) {
+					Node n = nodes.item(i);
+				
+					
+					NodeList home_nodes = n.getChildNodes();
+					for(int j = 0; j < home_nodes.getLength(); j++) {
+						Node home = home_nodes.item(j);
+						if(home.getNodeName() == HOME_TAG) {
+							NamedNodeMap map = home.getAttributes();
+							Node attrib = map.getNamedItem(HOME_ATTRIB_NAME);
+							String content = attrib.getTextContent();
+							if(content.equals(homename)){
+								home.setTextContent(location.getX() + ", " + location.getY() + ", " + location.getZ());
+							}
+						}
+					}
+				}
+				
+				DOMSource source = new DOMSource(d);
+				
+				TransformerFactory transFactory = TransformerFactory.newInstance();
+				Transformer transformer = transFactory.newTransformer();
+				StreamResult xmlResult = new StreamResult(getPlayerFile(username));
+				transformer.transform(source, xmlResult);
+			}else{
+				Sponge.getServer().getPlayer(username).get().sendMessage(Text.of("This argument does not exist!"));
+			}
+		} catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+	
+	public void delHome(String username, String homename){
+		File playerfile = getPlayerFile(username);
+		
+		try{
+			Document d = dBuilder.parse(playerfile);
+			NodeList nodes = d.getElementsByTagName(HOME_SECTION_TAG);
+			for(int i = 0; i < nodes.getLength(); i++) {
+				Node n = nodes.item(i);
+			
+				
+				NodeList home_nodes = n.getChildNodes();
+				for(int j = 0; j < home_nodes.getLength(); j++) {
+					Node home = home_nodes.item(j);
+					if(home.getNodeName() == HOME_TAG) {
+						NamedNodeMap map = home.getAttributes();
+						Node attrib = map.getNamedItem(HOME_ATTRIB_NAME);
+						String content = attrib.getTextContent();
+						if(content.equals(homename)){
+							n.removeChild(home);
+						}
+					}
+				}
+			}			
+
+			
+			DOMSource source = new DOMSource(d);
+			
+			TransformerFactory transFactory = TransformerFactory.newInstance();
+			Transformer transformer = transFactory.newTransformer();
+			StreamResult xmlResult = new StreamResult(getPlayerFile(username));
+			transformer.transform(source, xmlResult);	
+		} catch (Exception e){
+			e.printStackTrace();
+		}
 	}
 }

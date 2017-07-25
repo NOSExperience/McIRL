@@ -10,10 +10,13 @@ public class Commands {
 	CommandSpec addHome = CommandSpec.builder()
 			.description(Text.of("Add a home!"))
 			.executor(new HomeCommand(HomeCommand.Type.ADD))
+			.arguments(GenericArguments.string(Text.of("name")),
+					GenericArguments.optional(GenericArguments.string(Text.of("option"))))
 			.build();
 	CommandSpec delHome = CommandSpec.builder()
 			.description(Text.of("Delete a home!"))
 			.executor(new HomeCommand(HomeCommand.Type.DEL))
+			.arguments(GenericArguments.string(Text.of("name")))
 			.build();
 	CommandSpec home = CommandSpec.builder()
 			.description(Text.of("Test"))

@@ -62,6 +62,23 @@ public class HomeCommand implements CommandExecutor{
 		}
 	}
 	
+	private void delHome(String name, CommandSource src){
+		if(listHomes(src.getName()).contains(name)){
+			src.sendMessage(Text.of("Deleting Home " + name));
+			p.delHome(src.getName(), name);	
+		}else{
+			src.sendMessage(Text.of(name + " does not exist"));
+		}
+	}
+	
+	private void addHome(String name, CommandSource src){
+		p.addHome(src.getName(), name);
+	}
+	
+	private void addHome(String name, CommandSource src, String options){
+		p.addHome(src.getName(), name, options);
+	}
+	
 	@Override
 	public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
 		//src.sendMessage(Text.of(p.returnStats(src.getName(), Options.HOMES, null)));
@@ -70,16 +87,20 @@ public class HomeCommand implements CommandExecutor{
 			if(args.getOne("name").isPresent()){
 				goHome(args.<String>getOne("name").get(), src);
 				
-				
 			}else{
 				src.sendMessage(Text.of(listHomes(src.getName())));
 			}
 			break;
 		case DEL:
-			src.sendMessage(Text.of("Delete Home"));
+			delHome(args.<String>getOne("name").get(), src);
 			break;
 		case ADD:
-			src.sendMessage(Text.of("Add home"));
+			src.sendMessage(Text.of("Updating home " + args.<String>getOne("name").get()));
+			if(args.getOne("option").isPresent()){
+				addHome(args.<String>getOne("name").get(), src, args.<String>getOne("option").get());
+			}else{
+				addHome(args.<String>getOne("name").get(), src);
+			}
 			break;
 		default:
 			McIrl.getLogger().warn("Switch did something it never should...");
